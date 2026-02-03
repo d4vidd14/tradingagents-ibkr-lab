@@ -7,6 +7,14 @@ Une TradingAgentsClient + IBKRClient para:
 """
 
 from datetime import date as dt_date
+import sys
+from pathlib import Path
+
+# --- AÑADIR RAÍZ DEL PROYECTO AL PYTHONPATH ---
+PROJECT_ROOT = Path(__file__).resolve().parents[1]  # ...\tradingagents-ibkr-lab
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+# ----------------------------------------------
 
 from src.ta_client import TradingAgentsClient
 from src.ibkr_client import IBKRClient
