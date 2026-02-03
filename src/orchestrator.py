@@ -3,7 +3,7 @@ orchestrator.py
 
 Une TradingAgentsClient + IBKRClient para:
 1. Obtener una señal de TA.
-2. Ver qué orden se enviaría a IBKR (de momento solo print, sin ejecutar).
+2. Ajustar posición en IBKR paper.
 """
 
 from datetime import date as dt_date
@@ -12,24 +12,27 @@ from src.ta_client import TradingAgentsClient
 from src.ibkr_client import IBKRClient
 
 
+# Si esto está en True -> ENVÍA ÓRDENES REALES en la cuenta PAPER
+# Si lo pones en False -> solo imprime lo que haría (modo simulación)
+EXECUTE_ORDERS = True
+
+
 def main():
     symbol = "AAPL"
     today = dt_date.today().strftime("%Y-%m-%d")
 
-    # 1) Inicializar clientes
     ta_client = TradingAgentsClient(debug=False)
     ib_client = IBKRClient()
 
-    # 2) Conectar a IBKR paper
     ib_client.connect()
 
-    # 3) Obtener decisión de TradingAgents
+    # 1) Obtener decisión de TradingAgents para HOY
     decision = ta_client.get_decision(symbol, today)
     action = decision.get("action", "HOLD")
     confidence = decision.get("confidence", 0)
     risk = decision.get("risk_level", "unknown")
 
-    print("=== DECISIÓN TRADINGAGENTS ===")
+    print("=== DECISIÓN TRADINGAgents ===")
     print(f"Símbolo:    {symbol}")
     print(f"Fecha:      {today}")
     print(f"Acción:     {action}")
@@ -37,26 +40,36 @@ def main():
     print(f"Riesgo TA:  {risk}")
     print("================================")
 
-    # 4) Leer posición actual en IBKR
+    # 2) Leer posición actual en IBKR
     current_pos = ib_client.get_position(symbol)
-    TARGET_POSITION = 10  # hardcoded de ejemplo
+    TARGET_POSITION = 10  # objetivo de ejemplo
 
     print(f"Posición actual en {symbol}: {current_pos} acciones")
 
-    # 5) Solo imprimir lo que haríamos, sin ejecutar órdenes aún
+    # 3) Lógica simple de órdenes
     if action == "BUY":
         diff = TARGET_POSITION - current_pos
         if diff > 0:
-            print(f"[SIMULACIÓN] Enviaría una orden BUY de {diff} acciones de {symbol}.")
+            if EXECUTE_ORDERS:
+                print(f"[EJECUTANDO] BUY de {diff} acciones de {symbol}...")
+                ib_client.send_market_order(symbol, "BUY", diff)
+            else:
+                print(f"[SIMULACIÓN] Enviaría BUY de {diff} acciones de {symbol}.")
         else:
-            print("[SIMULACIÓN] Ya estás en o por encima de la posición objetivo, no compraría más.")
+            print("Ya estás en o por encima de la posición objetivo, no compro más.")
+
     elif action == "SELL":
         if current_pos > 0:
-            print(f"[SIMULACIÓN] Enviaría una orden SELL de {current_pos} acciones de {symbol}.")
+            if EXECUTE_ORDERS:
+                print(f"[EJECUTANDO] SELL de {current_pos} acciones de {symbol}...")
+                ib_client.send_market_order(symbol, "SELL", current_pos)
+            else:
+                print(f"[SIMULACIÓN] Enviaría SELL de {current_pos} acciones de {symbol}.")
         else:
-            print("[SIMULACIÓN] No tienes posición que vender.")
+            print("No tienes posición que vender.")
+
     else:
-        print("[SIMULACIÓN] HOLD → No haría nada.")
+        print("HOLD → No hago nada.")
 
     ib_client.disconnect()
 

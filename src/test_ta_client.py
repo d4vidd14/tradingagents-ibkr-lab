@@ -1,20 +1,21 @@
 from datetime import date as dt_date
 import sys
 from pathlib import Path
+import logging
 
-# --- HACK: añadir repo TradingAgents al PYTHONPATH ----
-PROJECT_ROOT = Path(__file__).resolve().parents[1]  # ...\tradingagents-ibkr-lab
-TA_REPO = PROJECT_ROOT.parent / "TradingAgents"      # ...\TradingAgents
+logging.basicConfig(level=logging.WARNING)  # para quitar tanto DEBUG
 
+# --- Añadir TradingAgents al path ---
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+TA_REPO = PROJECT_ROOT.parent / "TradingAgents"
 if TA_REPO.exists():
     sys.path.insert(0, str(TA_REPO))
 else:
     raise RuntimeError(f"No encuentro el repo TradingAgents en {TA_REPO}")
 
-# Ahora ya debería funcionar el import:
 from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.default_config import DEFAULT_CONFIG
-# ------------------------------------------------------
+# -------------------------------------
 
 
 def main():
@@ -28,7 +29,7 @@ def main():
     state, decision = ta.propagate(symbol, today)
 
     print("=== DECISIÓN TradingAgents ===")
-    print(decision)
+    print(decision)  # <- aquí verás el dict completo
     print("================================")
 
 
