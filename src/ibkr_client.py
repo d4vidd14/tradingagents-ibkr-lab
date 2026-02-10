@@ -173,6 +173,39 @@ class IBKRClient:
             return None
 
         return float(price_candidates[0])
+    
+    def get_last_price_ibkr_only(self, symbol: str) -> float | None:
+        """
+        Devuelve un precio usando SOLO datos de mercado de IBKR.
+        Si no hay suscripción / datos, devuelve None.
+
+        Úsalo cuando quieras comportamiento tipo 'real':
+        no tomar decisiones si el broker no da precio.
+        """
+        if not self.ib.isConnected():
+            raise RuntimeError("IBKR no está conectado.")
+
+        try:
+            contract = self._make_stock_contract(symbol)
+            ticker = self.ib.reqMktData(contract, "", False, False)
+            self.ib.sleep(2.0)
+
+            candidates = [
+                ticker.last,
+                ticker.close,
+                ticker.marketPrice(),
+            ]
+            candidates = [p for p in candidates if p is not None and p > 0]
+
+            if not candidates:
+                print(f"[WARN] IBKR no ha dado precio válido para {symbol}.")
+                return None
+
+            return float(candidates[0])
+        except Exception as e:
+            print(f"[WARN] Error obteniendo precio IBKR para {symbol}: {e}")
+            return None
+
 
     # ------------------------
     # Órdenes
