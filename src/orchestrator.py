@@ -39,7 +39,7 @@ MIN_MARKET_CAP = 2_000_000_000  # 2B
 
 EXECUTE_ORDERS = True        # True = manda órdenes en paper, False = solo simula
 
-SYMBOLS = ["AAPL"]           # lista de símbolos a gestionar (amplía esto luego)
+SYMBOLS = ["AAPL", "MSFT", "GOOGL", "META", "NVDA"]          # lista de símbolos a gestionar 
 
 
 # ---------- Helpers de datos (market cap, volatilidad, setup) ----------
@@ -158,7 +158,13 @@ def main():
     # 1) Equity y posiciones para tener visión global
     equity = ib_client.get_equity()
     positions = ib_client.get_all_positions()
-    open_trades = [p for p in positions if p.get("qty", 0) != 0]
+
+    # Solo contamos como "trade swing" las posiciones en los símbolos que está gestionando el bot
+    symbols_set = set(SYMBOLS)
+    open_trades = [
+        p for p in positions
+        if p.get("qty", 0) != 0 and p.get("symbol") in symbols_set
+    ]
     num_open_trades = len(open_trades)
 
     # A día de hoy, dimensionamos cada trade a 1%,
