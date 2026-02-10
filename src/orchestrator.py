@@ -39,7 +39,22 @@ MIN_MARKET_CAP = 2_000_000_000  # 2B
 
 EXECUTE_ORDERS = True        # True = manda órdenes en paper, False = solo simula
 
-SYMBOLS = ["AAPL", "MSFT", "GOOGL", "META", "NVDA"]          # lista de símbolos a gestionar 
+SYMBOLS = [
+    # Big Tech / growth grandes
+    "AMZN",   # Amazon
+
+    # Financiero / energía / defensivas
+    "JPM",    # JP Morgan
+    "XOM",    # Exxon Mobil
+    "JNJ",    # Johnson & Johnson
+    "PG",     # Procter & Gamble
+
+    # ETFs grandes (sirven bien para swing)
+    "SPY",    # S&P 500
+    "QQQ",    # Nasdaq 100
+    "IWM",    # Russell 2000
+]
+
 
 
 # ---------- Helpers de datos (market cap, volatilidad, setup) ----------
@@ -243,7 +258,8 @@ def main():
             print(f"Stop porcentual estimado: {stop_pct * 100:.2f}%")
 
             # Precio actual aproximado (por si los datos de IB están limitados)
-            last_price = ib_client.get_last_price(symbol)
+            last_price = ib_client.get_last_price_ibkr_only(symbol)
+
             if last_price is None or last_price <= 0:
                 print("No tengo un precio válido para dimensionar, no opero.")
                 continue
