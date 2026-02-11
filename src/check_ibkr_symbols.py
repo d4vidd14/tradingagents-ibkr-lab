@@ -5,6 +5,14 @@ Comprueba qué símbolos tienen datos de mercado disponibles vía IBKR.
 Úsalo para decidir qué SYMBOLS puede gestionar el bot.
 """
 
+import sys
+from pathlib import Path
+
+# Añadimos la raíz del proyecto al sys.path para que 'src' se pueda importar
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 from src.ibkr_client import IBKRClient
 
 CANDIDATE_SYMBOLS = [
